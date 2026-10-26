@@ -1,18 +1,9 @@
-//Document is the DOM can be accessed in the console with document.window.
-// Tree is from the top, html, body, p etc.
-
-//Problem: User interaction does not provide the correct results.
-//Solution: Add interactivity so the user can manage daily tasks.
-//Break things down into smaller steps and take each step at a time.
-
-// Event handling, user interaction is what starts the code execution.
-
 const taskInput = document.getElementById('new-task');
-const addButton = document.getElementsByTagName('button')[0];
+const addButton = document.querySelector('#topSectionForAddingElementToList button');
 const incompleteTaskHolder = document.getElementById('incompleteTasks');
 const completedTasksHolder = document.getElementById('completed-tasks');
 
-function createDeleteButton() {
+const createDeleteButton = () => {
   const deleteButton = document.createElement('button');
   const deleteButtonImg = document.createElement('img');
 
@@ -21,7 +12,7 @@ function createDeleteButton() {
   deleteButton.appendChild(deleteButtonImg);
 
   return deleteButton;
-}
+};
 
 const createNewTaskElement = function (taskString) {
   const listItem = document.createElement('li');
@@ -50,65 +41,69 @@ const createNewTaskElement = function (taskString) {
   return listItem;
 };
 
-const addTask = function () {
-  if (!taskInput.value.trim()) return;
-  const listItem = createNewTaskElement(taskInput.value);
+const addTask = () => {
+  const taskText = taskInput.value.trim();
+  if (!taskText) return;
 
+  const listItem = createNewTaskElement(taskText);
   incompleteTaskHolder.appendChild(listItem);
   bindTaskEvents(listItem, completeTask);
 
   taskInput.value = '';
 };
 
-const editTask = function () {
-  const listItem = this.parentNode;
+const editTask = (event) => {
+  const editButton = event.target;
+  const listItem = editButton.parentNode;
 
   const editInput = listItem.querySelector('input[type=text]');
   const label = listItem.querySelector('label');
-  const editBtn = listItem.querySelector('.edit');
   const isEditMode = listItem.classList.contains('editMode');
 
   if (isEditMode) {
     label.innerText = editInput.value;
-    editBtn.innerText = 'Edit';
+    editButton.innerText = 'Edit';
   } else {
     editInput.value = label.innerText;
-    editBtn.innerText = 'Save';
+    editButton.innerText = 'Save';
   }
 
   listItem.classList.toggle('editMode');
 };
 
-const deleteTask = function () {
-  const listItem = this.parentNode;
-  const ul = listItem.parentNode;
-
-  ul.removeChild(listItem);
+const deleteTask = (event) => {
+  const deleteButton = event.target;
+  const listItem = deleteButton.closest('li');
+  if (listItem) {
+    listItem.remove();
+  }
 };
 
-const completeTask = function () {
-  const listItem = this.parentNode;
+const completeTask = (event) => {
+  const checkBox = event.target;
+  const listItem = checkBox.parentNode;
   completedTasksHolder.appendChild(listItem);
   bindTaskEvents(listItem, activateTask);
 };
 
-const activateTask = function () {
-  const listItem = this.parentNode;
+const activateTask = (event) => {
+  const checkBox = event.target;
+  const listItem = checkBox.parentNode;
   incompleteTaskHolder.appendChild(listItem);
   bindTaskEvents(listItem, completeTask);
 };
 
-addButton.addEventListener('click', addTask);
-
-const bindTaskEvents = function (taskListItem, checkBoxEventHandler) {
+const bindTaskEvents = (taskListItem, checkBoxEventHandler) => {
   const checkBox = taskListItem.querySelector('input[type=checkbox]');
   const editButton = taskListItem.querySelector('button.edit');
   const deleteButton = taskListItem.querySelector('button.delete');
 
-  editButton.onclick = editTask;
-  deleteButton.onclick = deleteTask;
-  checkBox.onchange = checkBoxEventHandler;
+  editButton.onclick = (e) => editTask(e);
+  deleteButton.onclick = (e) => deleteTask(e);
+  checkBox.onchange = (e) => checkBoxEventHandler(e);
 };
+
+addButton.addEventListener('click', addTask);
 
 for (let i = 0; i < incompleteTaskHolder.children.length; i++) {
   bindTaskEvents(incompleteTaskHolder.children[i], completeTask);
